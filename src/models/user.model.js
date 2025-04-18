@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    userName: {
       type: String,
       required: true,
+      unique: true,
       trim: true,
+      lowercase: true,
+      minlength: [3, "Username must be at least 3 characters long"],
+      maxlength: [20, "Username cannot exceed 20 characters"],
+      match: [/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"],
     },
 
     email: {
@@ -23,7 +28,7 @@ const userSchema = new mongoose.Schema(
     },
 
     profilePicId: {
-        type: String,
+      type: String,
     },
 
     profilePic: {
