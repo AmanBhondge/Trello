@@ -7,7 +7,7 @@ import { generateToken } from "../utils/tokenGenerator.js";
 
 export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { userName, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "Email is already registered" });
@@ -35,7 +35,7 @@ export const signup = async (req, res) => {
     const otpExpiry = new Date(Date.now() + 1 * 60 * 1000);
 
     const newUser = new User({
-      name,
+      userName,
       email,
       passwordHash,
       profilePic,
@@ -129,7 +129,7 @@ export const login = async (req, res) => {
       token,
       user: {
         id: user._id,
-        name: user.name,
+        userName: user.userName,
         email: user.email,
         profilePic: user.profilePic,
       },
