@@ -49,17 +49,17 @@ export const emailValidator = [
 ];
 
 export const resetPasswordValidator = [
-    body('email')
+    body("email")
         .isEmail()
-        .withMessage('Valid email is required'),
+        .withMessage("Valid email is required"),
 
-    body('otp')
+    body("otp")
         .isLength({ min: 6, max: 6 })
-        .withMessage('OTP must be 6 digits')
+        .withMessage("OTP must be 6 digits")
         .matches(/^[0-9]+$/)
         .withMessage("OTP must be numeric"),
 
-    body('newPassword')
+    body("newPassword")
         .isLength({ min: 6 })
-        .withMessage('Password must be at least 6 characters long')
+        .withMessage("Password must be at least 6 characters long")
 ];
