@@ -60,7 +60,6 @@ export const resendOtp = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
-    if (user.isVerified) return res.status(400).json({ message: "User already verified" });
 
     const now = Date.now();
     const lastSent = user.lastOtpSentAt ? user.lastOtpSentAt.getTime() : 0;
