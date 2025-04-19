@@ -105,7 +105,7 @@ export const resendOtpForPasswordReset = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(now + 1 * 60 * 1000);
+    const otpExpiry = new Date(now + 2 * 60 * 1000);
 
     user.otp = otp;
     user.otpExpiresAt = otpExpiry;

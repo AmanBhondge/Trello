@@ -33,7 +33,7 @@ export const sendOTPToResetPassword = async (email , otp)=>{
         from: `"Trello" <${EMAIL_USER}>`,
         to: email,
         subject: 'Email Verification - OTP',
-        html: `<p>Your OTP for Password Reset is: <b>${otp}</b><br/>This OTP is valid for <b>1 minutes</b>.</p>`,
+        html: `<p>Your OTP for Password Reset is: <b>${otp}</b><br/>This OTP is valid for <b>2 minutes</b>.</p>`,
     };
 
     await transporter.sendMail(mailOptions);
