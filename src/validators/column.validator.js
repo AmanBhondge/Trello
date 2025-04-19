@@ -2,8 +2,7 @@ import { body } from "express-validator";
 
 export const createColumnValidation = [
     body("boardId").notEmpty().withMessage("Board ID is required"),
-    body("title").notEmpty().withMessage("Title is required"),
-    body("position").isNumeric().withMessage("Position must be a number")
+    body("title").notEmpty().withMessage("Title is required")
 ];
 
 export const updateColumnValidation = [
