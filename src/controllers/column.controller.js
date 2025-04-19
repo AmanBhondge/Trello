@@ -36,7 +36,60 @@ export const createColumn = async (req, res) => {
   }
 };
 
-export const updateColumn = async (req, res) => {
+export const moveColumn = async (req, res) => {
+  try {
+    const { boardId, columnId, newPosition } = req.body;
+
+    // Fetch the column to be moved
+    const columnToMove = await Column.findById(columnId);
+    if (!columnToMove) {
+      return res.status(404).json({ message: 'Column not found' });
+    }
+
+    const currentPosition = columnToMove.position;
+
+    if (currentPosition === newPosition) {
+      return res.status(200).json({ message: 'Column already at the desired position' });
+    }
+
+    // Determine the direction of movement and update positions accordingly
+    if (currentPosition < newPosition) {
+      // Moving down: Decrement positions of columns between currentPosition+1 and newPosition
+      await Column.updateMany(
+        {
+          boardId,
+          position: { $gt: currentPosition, $lte: newPosition },
+        },
+        { $inc: { position: -1 } }
+      );
+    } else {
+      // Moving up: Increment positions of columns between newPosition and currentPosition-1
+      await Column.updateMany(
+        {
+          boardId,
+          position: { $gte: newPosition, $lt: currentPosition },
+        },
+        { $inc: { position: 1 } }
+      );
+    }
+
+    // Update the position of the moved column
+    columnToMove.position = newPosition;
+    await columnToMove.save();
+
+    // Emit the columnMoved event to all clients in the board's room
+    io.to(boardId).emit('columnMoved', {
+      columnId,
+      newPosition,
+    });
+
+    res.status(200).json({ message: 'Column moved successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateColumnTitle = async (req, res) => {
   try {
     const { columnId } = req.params;
     const { title } = req.body;
