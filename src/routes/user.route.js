@@ -1,9 +1,5 @@
 import express from "express";
-import {
-    getProfile,
-    updateProfile,
-} from "../controllers/user.controller.js";
-
+import { getProfile, updateProfile } from "../controllers/user.controller.js";
 import { validateUpdateProfile } from "../validators/user.validator.js";
 import validate from "../middlewares/validate.middleware.js";
 import authorize from "../middlewares/authorize.middleware.js";
