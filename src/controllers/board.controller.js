@@ -68,38 +68,38 @@ export const addMemberToBoard = async (req, res) => {
     const { boardId } = req.params;
     const { memberId } = req.body;
     const requesterId = req.user.userId;
-
+  
     try {
-        const board = await Board.findById(boardId);
-        if (!board) {
-            return res.status(404).json({ message: 'Board not found' });
-        }
-
-        // Check if requester is an admin
-        if (!board.admins.includes(requesterId)) {
-            return res.status(403).json({ message: 'Only admins can add members' });
-        }
-
-        // Check if member is already in the board
-        if (board.members.includes(memberId)) {
-            return res.status(400).json({ message: 'User is already a member' });
-        }
-
-        // Add member to the board
-        board.members.push(memberId);
-        await board.save();
-
-        // Populate member details
-        const newMember = await User.findById(memberId).select('_id name email');
-
-        // Emit real-time update to the board room
-        req.io.to(boardId).emit('memberAdded', {
-            boardId,
-            member: newMember,
-        });
-
-        res.status(200).json({ message: 'Member added successfully', member: newMember });
+      const board = await Board.findById(boardId);
+      if (!board) {
+        return res.status(404).json({ message: 'Board not found' });
+      }
+  
+      // Check if requester is the creator of the board
+      if (board.createdBy.toString() !== requesterId) {
+        return res.status(403).json({ message: 'Only the board creator can add members' });
+      }
+  
+      // Check if member is already in the board
+      if (board.members.includes(memberId)) {
+        return res.status(400).json({ message: 'User is already a member' });
+      }
+  
+      // Add member to the board
+      board.members.push(memberId);
+      await board.save();
+  
+      // Populate member details
+      const newMember = await User.findById(memberId).select('_id name email');
+  
+      // Emit real-time update to the board's chat room
+      req.io.to(board.chatRoomId.toString()).emit('memberAdded', {
+        boardId: board._id,
+        member: newMember,
+      });
+  
+      res.status(200).json({ message: 'Member added successfully', member: newMember });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+      res.status(500).json({ message: 'Server error', error: error.message });
     }
-};
+  };  

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import zxcvbn from "zxcvbn";
 import User from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
-import { sendOTP } from "../utils/sendOTP.js";
+import { sendOTP, sendOTPToResetPassword } from "../utils/sendOTP.js";
 import { generateToken } from "../utils/tokenGenerator.js";
 
 export const signup = async (req, res) => {
