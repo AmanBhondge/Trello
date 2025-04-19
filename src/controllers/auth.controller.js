@@ -180,14 +180,14 @@ export const forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 1 * 60 * 1000);
+    const otpExpiry = new Date(Date.now() + 2 * 60 * 1000);
 
     user.otp = otp;
     user.otpExpiresAt = otpExpiry;
     user.lastOtpSentAt = new Date();
     await user.save();
 
-    await sendOTP(email, otp);
+    await sendOTPToResetPassword(email, otp);
 
     res.status(200).json({ message: "OTP sent to your email for password reset." });
   } catch (error) {
