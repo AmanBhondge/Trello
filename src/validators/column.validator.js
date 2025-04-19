@@ -7,5 +7,4 @@ export const createColumnValidation = [
 
 export const updateColumnValidation = [
     body("title").optional().notEmpty().withMessage("Title can't be empty"),
-    body("position").optional().isNumeric().withMessage("Position must be a number")
 ];

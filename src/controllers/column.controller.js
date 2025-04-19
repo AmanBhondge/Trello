@@ -39,11 +39,11 @@ export const createColumn = async (req, res) => {
 export const updateColumn = async (req, res) => {
   try {
     const { columnId } = req.params;
-    const { title, position } = req.body;
+    const { title } = req.body;
 
     const updatedColumn = await Column.findByIdAndUpdate(
       columnId,
-      { title, position },
+      { title },
       { new: true }
     );
 
