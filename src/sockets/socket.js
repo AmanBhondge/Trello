@@ -6,8 +6,10 @@ import User from "../models/user.model.js";
 // Store userId to socketId mapping
 const onlineUsers = new Map();
 
+let io; // Declare io outside so it can be exported
+
 const initSocket = (server) => {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: {
       origin: "*",
       methods: ["GET", "POST"]
@@ -20,9 +22,7 @@ const initSocket = (server) => {
       const decoded = jwt.verify(token, JWT_SECRET);
       const user = await User.findById(decoded.userId);
 
-      if (!user) {
-        return next(new Error("Authentication error"));
-      }
+      if (!user) return next(new Error("Authentication error"));
 
       socket.user = {
         userId: user._id.toString(),
@@ -37,9 +37,7 @@ const initSocket = (server) => {
   io.on("connection", (socket) => {
     const { userId } = socket.user;
 
-    // Add user to online map
     onlineUsers.set(userId, socket.id);
-
     console.log(`User connected: ${userId}`);
 
     socket.on("joinBoard", (boardId) => {
@@ -59,8 +57,6 @@ const initSocket = (server) => {
       console.log(`User disconnected: ${userId}`);
     });
   });
-
-  return io;
 };
 
-export { initSocket, onlineUsers };
+export { initSocket, onlineUsers, io }; 

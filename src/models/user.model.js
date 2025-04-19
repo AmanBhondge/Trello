@@ -47,11 +47,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
-    fcmToken: {
-      type: String,
-      default: null,
-    },
     isVerified: {
       type: Boolean,
       default: false
