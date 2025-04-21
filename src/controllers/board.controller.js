@@ -93,6 +93,10 @@ export const addMemberToBoard = async (req, res) => {
       return res.status(403).json({ message: 'Only the board creator can add members' });
     }
 
+    if (memberId === requesterId) {
+      return res.status(400).json({ message: 'You are the board creator and cannot add yourself as a member' });
+    }
+
     const isAlreadyMember = board.members.some(member => member.toString() === memberId);
     if (isAlreadyMember) {
       return res.status(400).json({ message: 'User is already a member of this board' });
