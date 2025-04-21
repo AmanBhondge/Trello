@@ -107,7 +107,7 @@ export const addMemberToBoard = async (req, res) => {
       member: newMember,
     });
 
-    await sendInviteEmail(newMember.email, board.title, inviter.name);
+    await sendInviteEmail(newMember.email, board.title, inviter.userName);
 
     res.status(200).json({ message: 'Member added successfully', member: newMember });
   } catch (error) {
