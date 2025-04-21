@@ -2,8 +2,7 @@ import { body, param } from "express-validator";
 
 export const createTaskValidation = [
     body("columnId", "Column ID is required").isMongoId(),
-    body("title", "Title is required").notEmpty(),
-    body("assigne", "Assignee is required").isMongoId()
+    body("title", "Title is required").notEmpty()
 ];
 
 export const updateTaskValidation = [
