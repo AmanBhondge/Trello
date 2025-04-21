@@ -4,9 +4,8 @@ import { JWT_SECRET } from "../config/config.js";
 import User from "../models/user.model.js";
 import Board from "../models/board.model.js";
 
-// Store userId to socketId mapping
 const onlineUsers = new Map();
-let io; // Declare io globally
+let io; 
 
 const initSocket = (server) => {
   io = new Server(server, {
@@ -16,7 +15,6 @@ const initSocket = (server) => {
     }
   });
 
-  // Authentication middleware
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
@@ -40,7 +38,6 @@ const initSocket = (server) => {
     console.log(`User connected: ${userId}`);
 
     try {
-      // Auto join all boards user is part of
       const boards = await Board.find({
         $or: [{ members: userId }, { createdBy: userId }]
       }).select("_id");
