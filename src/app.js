@@ -12,6 +12,7 @@ import authRouter from './routes/auth.route.js';
 import userRouter from './routes/user.route.js';
 import boardRouter from './routes/board.route.js';
 import columnRouter from './routes/column.route.js';
+import taskRouter from './routes/task.route.js';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/board", boardRouter);
 app.use("/api/v1/column", columnRouter);
+app.use("/api/v1/task", taskRouter);
 
 app.use(errorMiddleware);
 
