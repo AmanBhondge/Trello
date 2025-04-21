@@ -15,7 +15,7 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const updates = {};
-        const user = await User.findById(req.user.userId);  // Use req.user.userId
+        const user = await User.findById(req.user.userId);  
         if (!user) return res.status(404).json({ message: "User not found" });
 
         if (req.body.userName) {

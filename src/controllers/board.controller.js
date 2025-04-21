@@ -3,7 +3,6 @@ import Board from '../models/board.model.js';
 import User from '../models/user.model.js';
 import { sendInviteEmail } from "../utils/sendOTP.js";
 
-
 export const getMyBoards = async (req, res) => {
   try {
     const boards = await Board.find({ createdBy: req.user.userId }).select('_id title');
@@ -62,7 +61,6 @@ export const updateBoardTitle = async (req, res) => {
     board.title = title;
     const updatedBoard = await board.save();
 
-    // 🔥 Real-time emit to board members
     req.io.to(updatedBoard._id.toString()).emit("boardTitleUpdated", {
       boardId: updatedBoard._id,
       newTitle: updatedBoard.title,
@@ -80,43 +78,35 @@ export const addMemberToBoard = async (req, res) => {
   const requesterId = req.user.userId;
 
   try {
-    // Validate ObjectIds
     if (!mongoose.Types.ObjectId.isValid(boardId) || !mongoose.Types.ObjectId.isValid(memberId)) {
       return res.status(400).json({ message: 'Invalid boardId or memberId' });
     }
 
-    // Fetch board and check existence
     const board = await Board.findById(boardId);
     if (!board) return res.status(404).json({ message: 'Board not found' });
 
-    // Block adding members to private boards
     if (board.visibility === 'private') {
       return res.status(403).json({ message: 'Cannot add members to a private board' });
     }
 
-    // Only the board creator can add members
     if (board.createdBy.toString() !== requesterId) {
       return res.status(403).json({ message: 'Only the board creator can add members' });
     }
 
-    // Add member using $addToSet to avoid duplicates
     const updatedBoard = await Board.findByIdAndUpdate(
       boardId,
       { $addToSet: { members: memberId } },
       { new: true }
     );
 
-    // Fetch new member info
     const newMember = await User.findById(memberId).select('_id name email');
     const inviter = await User.findById(requesterId).select('name');
 
-    // 🔥 Emit real-time update to board room
     req.io.to(updatedBoard._id.toString()).emit('memberAdded', {
       boardId: updatedBoard._id,
       member: newMember,
     });
 
-    // 📩 Send invite email
     await sendInviteEmail(newMember.email, board.title, inviter.name);
 
     res.status(200).json({ message: 'Member added successfully', member: newMember });
