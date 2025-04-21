@@ -14,7 +14,8 @@ export const getTasksByColumn = async (req, res) => {
 
 export const createTask = async (req, res) => {
     try {
-        const { columnId, title, description, assigne, tags, dueDate, attachments } = req.body;
+        const { columnId, title, description, tags, dueDate, attachments } = req.body;
+        const assigne = req.user.userId;
 
         const taskCount = await Task.countDocuments({ columnId });
 
