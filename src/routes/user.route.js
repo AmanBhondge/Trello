@@ -1,5 +1,5 @@
 import express from "express";
-import { getProfile, updateProfile } from "../controllers/user.controller.js";
+import { getProfile, updateProfile, searchUsers } from "../controllers/user.controller.js";
 import { validateUpdateProfile } from "../validators/user.validator.js";
 import validate from "../middlewares/validate.middleware.js";
 import authorize from "../middlewares/authorize.middleware.js";
@@ -8,6 +8,8 @@ import cloudinaryUpload from "../middlewares/cloudinaryUpload.middleware.js";
 const userRouter = express.Router();
 
 userRouter.get("/profile", authorize, getProfile);
+
+userRouter.get("/search", authorize, searchUsers);
 
 userRouter.patch(
     "/update",
