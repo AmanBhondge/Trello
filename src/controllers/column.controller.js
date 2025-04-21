@@ -105,7 +105,7 @@ export const getColumnsWithTasksAndComments = async (req, res) => {
     const { boardId } = req.params;
 
     const columns = await Column.find({ boardId })
-      .sort({ position: 1 })
+      .sort({ position: 1 }) 
       .populate({
         path: 'taskId',
         model: 'Task',
@@ -114,16 +114,16 @@ export const getColumnsWithTasksAndComments = async (req, res) => {
         populate: [
           {
             path: 'assigne',
-            model: 'user',
+            model: 'User', 
             select: 'userName email',
           },
           {
             path: 'comments',
-            model: 'comment',
+            model: 'Comment', 
             select: 'content createdAt userId',
             populate: {
               path: 'userId',
-              model: 'user',
+              model: 'User', 
               select: 'userName email',
             },
           },
@@ -139,4 +139,4 @@ export const getColumnsWithTasksAndComments = async (req, res) => {
     console.error('Error fetching columns:', err);
     res.status(500).json({ error: err.message });
   }
-};
+}
