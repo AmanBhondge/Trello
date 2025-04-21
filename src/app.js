@@ -6,7 +6,7 @@ import http from 'http';
 import { PORT } from './config/config.js';
 import connectToDatabase from './config/db.js';
 import errorMiddleware from './middlewares/error.middleware.js';
-import { initSocket } from './sockets/socket.js';
+import { initSocket, io } from './sockets/socket.js';
 
 import authRouter from './routes/auth.route.js';
 import userRouter from './routes/user.route.js';
@@ -21,26 +21,30 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// Attach io to req
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+// Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/board", boardRouter);
 app.use("/api/v1/column", columnRouter);
 
-
 // Error Middleware
 app.use(errorMiddleware);
 
-// HTTP Server & Socket.IO
+// Start HTTP server
 const server = http.createServer(app);
-initSocket(server); // Initializes socket.io on the server
+initSocket(server); // Initialize socket.io
 
-// Start Server
 const startServer = async () => {
-    await connectToDatabase();
-
-    server.listen(PORT, () => {
-        console.log(`🚀 API is running on http://localhost:${PORT}`);
-    });
+  await connectToDatabase();
+  server.listen(PORT, () => {
+    console.log(`🚀 API is running on http://localhost:${PORT}`);
+  });
 };
 
 startServer();

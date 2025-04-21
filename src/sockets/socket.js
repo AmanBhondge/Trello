@@ -2,26 +2,26 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/config.js";
 import User from "../models/user.model.js";
+import Board from "../models/board.model.js";
 
 // Store userId to socketId mapping
 const onlineUsers = new Map();
-
-let io; // Declare io outside so it can be exported
+let io; // Declare io globally
 
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: "*",
-      methods: ["GET", "POST"]
+      methods: ["GET", "POST", "PUT"]
     }
   });
 
+  // Authentication middleware
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
       const decoded = jwt.verify(token, JWT_SECRET);
       const user = await User.findById(decoded.userId);
-
       if (!user) return next(new Error("Authentication error"));
 
       socket.user = {
@@ -34,11 +34,23 @@ const initSocket = (server) => {
     }
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     const { userId } = socket.user;
-
     onlineUsers.set(userId, socket.id);
     console.log(`User connected: ${userId}`);
+
+    try {
+      // Auto join all boards user is part of
+      const boards = await Board.find({
+        $or: [{ members: userId }, { createdBy: userId }]
+      }).select("_id");
+
+      boards.forEach((board) => {
+        socket.join(board._id.toString());
+      });
+    } catch (err) {
+      console.error("Error joining user to boards:", err);
+    }
 
     socket.on("joinBoard", (boardId) => {
       socket.join(boardId);
@@ -59,4 +71,4 @@ const initSocket = (server) => {
   });
 };
 
-export { initSocket, onlineUsers, io }; 
+export { initSocket, onlineUsers, io };
