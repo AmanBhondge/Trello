@@ -93,25 +93,35 @@ export const addMemberToBoard = async (req, res) => {
       return res.status(403).json({ message: 'Only the board creator can add members' });
     }
 
+    const isAlreadyMember = board.members.some(member => member.toString() === memberId);
+    if (isAlreadyMember) {
+      return res.status(400).json({ message: 'User is already a member of this board' });
+    }
+
     const updatedBoard = await Board.findByIdAndUpdate(
       boardId,
       { $addToSet: { members: memberId } },
       { new: true }
     );
 
-    const newMember = await User.findById(memberId).select('_id name email');
-    const inviter = await User.findById(requesterId).select('name');
+    const newMember = await User.findById(memberId).select('_id userName email');
+    const inviter = await User.findById(requesterId).select('userName');
 
-    req.io.to(updatedBoard._id.toString()).emit('memberAdded', {
-      boardId: updatedBoard._id,
-      member: newMember,
-    });
+    if (req.io) {
+      req.io.to(updatedBoard._id.toString()).emit('memberAdded', {
+        boardId: updatedBoard._id,
+        member: newMember,
+      });
+    }
 
     await sendInviteEmail(newMember.email, board.title, inviter.userName);
 
-    res.status(200).json({ message: 'Member added successfully', member: newMember });
+    res.status(200).json({
+      message: 'Member added successfully',
+      member: newMember,
+    });
   } catch (error) {
-    console.error("Error adding member to board:", error);
+    console.error('Error adding member to board:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
