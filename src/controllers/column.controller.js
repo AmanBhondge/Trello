@@ -2,6 +2,7 @@ import Column from "../models/column.model.js";
 import Board from "../models/board.model.js";
 import { io } from "../sockets/socket.js";
 import Task from '../models/task.model.js';
+import User from "../models/user.model.js";
 import Comment from '../models/comment.model.js';
 
 export const createColumn = async (req, res) => {
