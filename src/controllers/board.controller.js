@@ -89,7 +89,7 @@ export const addMemberToBoard = async (req, res) => {
       return res.status(403).json({ message: 'Cannot add members to a private board' });
     }
 
-    if (board.createdBy.toString() !== requesterId) {
+    if (board.createdBy.toString() !== requesterId.toString()) {
       return res.status(403).json({ message: 'Only the board creator can add members' });
     }
 
@@ -113,5 +113,28 @@ export const addMemberToBoard = async (req, res) => {
   } catch (error) {
     console.error("Error adding member to board:", error);
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const getBoardMembers = async (req, res) => {
+  const { boardId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(boardId)) {
+    return res.status(400).json({ message: "Invalid board ID" });
+  }
+
+  try {
+    const board = await Board.findById(boardId).populate({
+      path: "members",
+      select: "_id userName email profilePic",
+    });
+
+    if (!board) {
+      return res.status(404).json({ message: "Board not found" });
+    }
+
+    res.status(200).json({ members: board.members });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
