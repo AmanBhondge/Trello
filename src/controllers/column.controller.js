@@ -104,26 +104,38 @@ export const getColumnsWithTasksAndComments = async (req, res) => {
     const { boardId } = req.params;
 
     const columns = await Column.find({ boardId })
+      .sort({ position: 1 })
       .populate({
         path: 'taskId',
-        select: 'title description assigne tags dueDate',
-        populate: {
-          path: 'comments',
-          select: 'content createdAt',
-          populate: {
-            path: 'userId',
-            select: 'name email',
+        model: 'Task',
+        options: { sort: { position: 1 } }, 
+        select: 'title description assigne tags dueDate comments attachments position',
+        populate: [
+          {
+            path: 'assigne',
+            model: 'user',
+            select: 'userName email',
           },
-        },
-      })
-      .exec();
+          {
+            path: 'comments',
+            model: 'comment',
+            select: 'content createdAt userId',
+            populate: {
+              path: 'userId',
+              model: 'user',
+              select: 'userName email',
+            },
+          },
+        ],
+      });
 
-    if (!columns) {
+    if (!columns || columns.length === 0) {
       return res.status(404).json({ message: 'No columns found for this board' });
     }
 
     res.status(200).json(columns);
   } catch (err) {
+    console.error('Error fetching columns:', err);
     res.status(500).json({ error: err.message });
   }
 };
