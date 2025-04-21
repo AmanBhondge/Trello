@@ -1,4 +1,5 @@
 import Task from "../models/task.model.js";
+import Column from "../models/column.model.js";
 import mongoose from "mongoose";
 
 export const getTasksByColumn = async (req, res) => {
@@ -31,6 +32,12 @@ export const createTask = async (req, res) => {
         });
 
         await newTask.save();
+
+        await Column.findByIdAndUpdate(
+            columnId,
+            { $push: { taskId: newTask._id } },
+            { new: true }
+        );
 
         res.status(201).json({ message: "Task created successfully", task: newTask });
     } catch (error) {
