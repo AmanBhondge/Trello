@@ -89,26 +89,30 @@ export const updateTask = async (req, res) => {
         task.columnId = newColumnId;
         task.position = position;
       }
-  
       else if (position !== undefined && position !== oldPosition) {
-        const direction = position > oldPosition ? -1 : 1;
-        const rangeQuery = position > oldPosition
-          ? { $gt: oldPosition, $lte: position }
-          : { $gte: position, $lt: oldPosition };
-  
-        await Task.updateMany(
-          { columnId: oldColumnId, position: rangeQuery },
-          { $inc: { position: direction } }
-        );
-  
-        task.position = position;
-  
         const column = await Column.findById(oldColumnId);
         if (column) {
-          column.taskId.pull(taskId);
-          column.taskId.splice(position, 0, taskId);
-          await column.save();
+          const currentIndex = column.taskId.findIndex(id => id.toString() === taskId);
+          if (currentIndex !== -1) {
+            column.taskId.splice(currentIndex, 1);
+            column.taskId.splice(position, 0, taskId);
+            await column.save();
+          }
         }
+  
+        if (position > oldPosition) {
+          await Task.updateMany(
+            { columnId: oldColumnId, position: { $gt: oldPosition, $lte: position } },
+            { $inc: { position: -1 } }
+          );
+        } else {
+          await Task.updateMany(
+            { columnId: oldColumnId, position: { $gte: position, $lt: oldPosition } },
+            { $inc: { position: 1 } }
+          );
+        }
+  
+        task.position = position;
       }
   
       Object.assign(task, updateFields);
