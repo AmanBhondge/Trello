@@ -47,80 +47,76 @@ export const createTask = async (req, res) => {
 };
 
 export const updateTask = async (req, res) => {
-    const { taskId } = req.params;
-    const { columnId, position, ...updateFields } = req.body;
-  
-    try {
-      if (!mongoose.Types.ObjectId.isValid(taskId)) {
-        return res.status(400).json({ message: "Invalid task ID" });
-      }
-  
-      const task = await Task.findById(taskId);
-      if (!task) return res.status(404).json({ message: "Task not found" });
-  
-      const oldColumnId = task.columnId.toString();
-      const oldPosition = task.position;
-      const newColumnId = columnId || oldColumnId;
-  
-      if (columnId && columnId !== oldColumnId) {
-        await Task.updateMany(
-          { columnId: oldColumnId, position: { $gt: oldPosition } },
-          { $inc: { position: -1 } }
-        );
-  
-        await Task.updateMany(
-          { columnId: newColumnId, position: { $gte: position } },
-          { $inc: { position: 1 } }
-        );
-  
-        await Column.findByIdAndUpdate(oldColumnId, {
-          $pull: { taskId: taskId },
-        });
-  
-        await Column.findByIdAndUpdate(newColumnId, {
-          $push: {
-            taskId: {
-              $each: [taskId],
-              $position: position,
-            },
-          },
-        });
-  
-        task.columnId = newColumnId;
-        task.position = position;
-      }
-      else if (position !== undefined && position !== oldPosition) {
-        const column = await Column.findById(oldColumnId);
-        if (column) {
-          const currentIndex = column.taskId.findIndex(id => id.toString() === taskId);
-          if (currentIndex !== -1) {
-            column.taskId.splice(currentIndex, 1);
-            column.taskId.splice(position, 0, taskId);
-            await column.save();
-          }
-        }
-  
-        if (position > oldPosition) {
-          await Task.updateMany(
-            { columnId: oldColumnId, position: { $gt: oldPosition, $lte: position } },
-            { $inc: { position: -1 } }
-          );
-        } else {
-          await Task.updateMany(
-            { columnId: oldColumnId, position: { $gte: position, $lt: oldPosition } },
-            { $inc: { position: 1 } }
-          );
-        }
-  
-        task.position = position;
-      }
-  
-      Object.assign(task, updateFields);
-      await task.save();
-  
-      res.status(200).json({ message: "Task updated successfully", task });
-    } catch (error) {
-      console.error("Error updating task:", error);
-      res.status(500).json({ message: "Error updating task", error: error.message });
+  const { taskId } = req.params;
+  const { columnId: newColumnId, position: newPosition, ...updateFields } = req.body;
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+      return res.status(400).json({ message: "Invalid task ID" });
     }
-  };
+
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    const oldColumnId = task.columnId.toString();
+    const oldPosition = task.position;
+    const isColumnChanged = newColumnId && newColumnId !== oldColumnId;
+
+    if (isColumnChanged) {
+      await Task.updateMany(
+        { columnId: oldColumnId, position: { $gt: oldPosition } },
+        { $inc: { position: -1 } }
+      );
+
+      await Task.updateMany(
+        { columnId: newColumnId, position: { $gte: newPosition } },
+        { $inc: { position: 1 } }
+      );
+
+      await Column.findByIdAndUpdate(oldColumnId, {
+        $pull: { taskId: taskId },
+      });
+
+      await Column.findByIdAndUpdate(newColumnId, {
+        $push: {
+          taskId: {
+            $each: [taskId],
+            $position: newPosition,
+          },
+        },
+      });
+
+      task.columnId = newColumnId;
+      task.position = newPosition;
+    }
+
+    else if (newPosition !== undefined && newPosition !== oldPosition) {
+      const direction = newPosition > oldPosition ? -1 : 1;
+      const rangeQuery = newPosition > oldPosition
+        ? { $gt: oldPosition, $lte: newPosition }
+        : { $gte: newPosition, $lt: oldPosition };
+
+      await Task.updateMany(
+        { columnId: oldColumnId, position: rangeQuery },
+        { $inc: { position: direction } }
+      );
+
+      const column = await Column.findById(oldColumnId);
+      if (column) {
+        column.taskId.pull(taskId);
+        column.taskId.splice(newPosition, 0, taskId);
+        await column.save();
+      }
+
+      task.position = newPosition;
+    }
+
+    Object.assign(task, updateFields);
+    await task.save();
+
+    res.status(200).json({ message: "Task updated successfully", task });
+  } catch (error) {
+    console.error("Error updating task:", error);
+    res.status(500).json({ message: "Error updating task", error: error.message });
+  }
+};
