@@ -73,9 +73,6 @@ export const updateTask = async (req, res) => {
           { $inc: { position: 1 } }
         );
   
-        task.columnId = newColumnId;
-        task.position = position;
-  
         await Column.findByIdAndUpdate(oldColumnId, {
           $pull: { taskId: taskId },
         });
@@ -88,6 +85,9 @@ export const updateTask = async (req, res) => {
             },
           },
         });
+  
+        task.columnId = newColumnId;
+        task.position = position;
       }
   
       else if (position !== undefined && position !== oldPosition) {
