@@ -15,36 +15,44 @@ export const getTasksByColumn = async (req, res) => {
 
 export const createTask = async (req, res) => {
     try {
-        const { columnId, title, description, tags, dueDate, attachments } = req.body;
-        const assigne = req.user.userId;
-
-        const taskCount = await Task.countDocuments({ columnId });
-
-        const newTask = new Task({
-            columnId,
-            title,
-            description,
-            assigne,
-            tags,
-            dueDate,
-            attachments,
-            position: taskCount + 1,
-        });
-
-        await newTask.save();
-
-        await Column.findByIdAndUpdate(
-            columnId,
-            { $push: { taskId: newTask._id } },
-            { new: true }
-        );
-
-        res.status(201).json({ message: "Task created successfully", task: newTask });
+      const { columnId, title, description, tags, dueDate, attachments } = req.body;
+      const assigne = req.user.userId;
+  
+      const column = await Column.findById(columnId);
+      if (!column) {
+        return res.status(404).json({ message: "Column not found" });
+      }
+  
+      const taskCount = await Task.countDocuments({ columnId });
+  
+      const newTask = new Task({
+        columnId,
+        title,
+        description,
+        assigne,
+        tags,
+        dueDate,
+        attachments,
+        position: taskCount + 1,
+      });
+  
+      await newTask.save();
+  
+      const updatedColumn = await Column.findByIdAndUpdate(
+        columnId,
+        { $push: { tasks: newTask._id } }, 
+        { new: true }
+      );
+  
+      console.log("Task added to column:", updatedColumn);
+  
+      res.status(201).json({ message: "Task created successfully", task: newTask });
     } catch (error) {
-        console.error("Error creating task:", error);
-        res.status(500).json({ message: "Error creating task", error: error.message });
+      console.error("Error creating task:", error);
+      res.status(500).json({ message: "Error creating task", error: error.message });
     }
-};
+  };
+  
 
 export const updateTask = async (req, res) => {
     const { taskId } = req.params;

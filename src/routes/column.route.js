@@ -10,7 +10,7 @@ columnRouter.post("/", authorize, createColumnValidation, validate, createColumn
 
 columnRouter.patch("/:columnId", authorize, updateColumnValidation, validate, updateColumnTitle);
 
-columnRouter.get('/get-all/:boardId', authorize, getColumnsWithTasksAndComments);
+columnRouter.get('/get-all/:boardId', getColumnsWithTasksAndComments);
 
 columnRouter.patch('/columns/move', authorize, moveColumn);
 

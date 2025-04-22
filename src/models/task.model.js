@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const taskSchema = new mongoose.Schema({
     columnId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "column",
+        ref: "Column",
         required: true
     },
     title: {
@@ -15,7 +15,7 @@ const taskSchema = new mongoose.Schema({
     },
     assigne: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        ref: "User",
         required: true
     },
     tags: [
@@ -29,7 +29,7 @@ const taskSchema = new mongoose.Schema({
     comments: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "comment"
+            ref: "Comment"
         }
     ],
     attachments: [

@@ -105,29 +105,29 @@ export const getColumnsWithTasksAndComments = async (req, res) => {
     const { boardId } = req.params;
 
     const columns = await Column.find({ boardId })
-      .sort({ position: 1 }) 
+      .sort({ position: 1 })
       .populate({
         path: 'taskId',
         model: 'Task',
-        options: { sort: { position: 1 } }, 
+        options: { sort: { position: 1 } },
         select: 'title description assigne tags dueDate comments attachments position',
         populate: [
           {
             path: 'assigne',
-            model: 'User', 
-            select: 'userName email',
+            model: 'User',
+            select: 'userName email'
           },
           {
             path: 'comments',
-            model: 'Comment', 
+            model: 'Comment',
             select: 'content createdAt userId',
             populate: {
               path: 'userId',
-              model: 'User', 
-              select: 'userName email',
-            },
-          },
-        ],
+              model: 'User',
+              select: 'userName email'
+            }
+          }
+        ]
       });
 
     if (!columns || columns.length === 0) {
