@@ -25,7 +25,7 @@ export const getAllBoards = async (req, res) => {
       .select('_id title visibility description createdBy')
       .populate({
         path: 'createdBy',
-        select: 'userName email'
+        select: 'userName email -_id'
       });
 
     res.status(200).json(boards);
