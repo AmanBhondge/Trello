@@ -139,7 +139,10 @@ export const getColumnsWithTasksAndComments = async (req, res) => {
       return res.status(404).json({ message: 'No columns found for this board' });
     }
 
-    res.status(200).json(columns);
+    res.status(200).json({
+      boardTitle: board.title,
+      columns
+    });
   } catch (err) {
     console.error('Error fetching columns:', err);
     res.status(500).json({ error: err.message });
