@@ -20,7 +20,7 @@ export const getAllBoards = async (req, res) => {
         { createdBy: userId },
         { members: userId }
       ]
-    }).select('_id title');
+    }).select('_id title visibility');
     res.status(200).json(boards);
   } catch (err) {
     res.status(500).json({ error: err.message });
