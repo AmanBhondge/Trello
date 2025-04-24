@@ -64,12 +64,13 @@ export const updateBoardTitle = async (req, res) => {
       return res.status(400).json({ error: 'Invalid board ID' });
     }
 
-    const board = await Board.findById(boardId);
+    const board = await Board.findById(boardId).select('createdBy title description visibility');
+
     if (!board) {
       return res.status(404).json({ error: 'Board not found' });
     }
 
-    if (board.createdBy.toString() !== req.user.userId) {
+    if (!board.createdBy.equals(req.user.userId)) {
       return res.status(403).json({ error: 'Only the board creator can update the board' });
     }
 
