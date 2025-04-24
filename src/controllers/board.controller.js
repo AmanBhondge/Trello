@@ -69,6 +69,10 @@ export const updateBoardTitle = async (req, res) => {
       return res.status(404).json({ error: 'Board not found' });
     }
 
+    if (board.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ error: 'Only the board creator can update the board' });
+    }
+
     if (title !== undefined) board.title = title;
     if (description !== undefined) board.description = description;
     if (visibility !== undefined) board.visibility = visibility;
