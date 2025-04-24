@@ -22,10 +22,10 @@ export const getAllBoards = async (req, res) => {
         { members: userId }
       ]
     })
-      .select('_id title visibility description createdBy') 
+      .select('_id title visibility description createdBy')
       .populate({
         path: 'createdBy',
-        select: 'userName email' 
+        select: 'userName email'
       });
 
     res.status(200).json(boards);
@@ -56,25 +56,35 @@ export const createBoard = async (req, res) => {
 };
 
 export const updateBoardTitle = async (req, res) => {
-  const { title } = req.body;
+  const { title, description, visibility } = req.body;
   const boardId = req.params.id;
 
   try {
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ error: 'Invalid board ID' });
+    }
+
     const board = await Board.findById(boardId);
     if (!board) {
       return res.status(404).json({ error: 'Board not found' });
     }
 
-    board.title = title;
+    if (title !== undefined) board.title = title;
+    if (description !== undefined) board.description = description;
+    if (visibility !== undefined) board.visibility = visibility;
+
     const updatedBoard = await board.save();
 
     req.io.to(updatedBoard._id.toString()).emit("boardTitleUpdated", {
       boardId: updatedBoard._id,
       newTitle: updatedBoard.title,
+      newDescription: updatedBoard.description,
+      newVisibility: updatedBoard.visibility,
     });
 
     res.status(200).json(updatedBoard);
   } catch (err) {
+    console.error("Error updating board:", err);
     res.status(500).json({ error: err.message });
   }
 };
