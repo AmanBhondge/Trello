@@ -12,7 +12,7 @@ let io;
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: "https://trello-sigma-pearl.vercel.app",
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
     }
   });
