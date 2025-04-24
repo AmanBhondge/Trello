@@ -5,7 +5,7 @@ import { sendInviteEmail } from "../utils/sendOTP.js";
 
 export const getMyBoards = async (req, res) => {
   try {
-    const boards = await Board.find({ createdBy: req.user.userId }).select('_id title');
+    const boards = await Board.find({ createdBy: req.user.userId }).select('_id title visibility description');
     res.status(200).json(boards);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -20,7 +20,7 @@ export const getAllBoards = async (req, res) => {
         { createdBy: userId },
         { members: userId }
       ]
-    }).select('_id title visibility');
+    }).select('_id title visibility description');
     res.status(200).json(boards);
   } catch (err) {
     res.status(500).json({ error: err.message });
