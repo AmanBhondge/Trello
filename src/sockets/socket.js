@@ -97,6 +97,21 @@ const initSocket = (server) => {
       });
     });
 
+    // Task-related event handlers
+    socket.on("taskCreate", (data) => {
+      const { boardId, columnId, task } = data;
+      socket.to(boardId).emit("taskCreated", {
+        boardId,
+        columnId,
+        task,
+        createdBy: {
+          userId,
+          userName
+        },
+        timestamp: new Date()
+      });
+    });
+
     socket.on("taskUpdate", (data) => {
       const { boardId, taskId, updates } = data;
       socket.to(boardId).emit("taskUpdated", {
@@ -111,6 +126,54 @@ const initSocket = (server) => {
       });
     });
 
+    socket.on("taskDelete", (data) => {
+      const { boardId, taskId, columnId } = data;
+      socket.to(boardId).emit("taskDeleted", {
+        boardId,
+        taskId,
+        columnId,
+        deletedBy: {
+          userId,
+          userName
+        },
+        timestamp: new Date()
+      });
+    });
+
+    socket.on("taskMove", (data) => {
+      const { boardId, taskId, sourceColumnId, destinationColumnId, oldPosition, newPosition } = data;
+      socket.to(boardId).emit("taskMoved", {
+        boardId,
+        taskId,
+        sourceColumnId,
+        destinationColumnId,
+        oldPosition,
+        newPosition,
+        movedBy: {
+          userId,
+          userName
+        },
+        timestamp: new Date()
+      });
+    });
+
+    socket.on("taskReorder", (data) => {
+      const { boardId, taskId, columnId, oldPosition, newPosition } = data;
+      socket.to(boardId).emit("taskReordered", {
+        boardId,
+        taskId,
+        columnId,
+        oldPosition,
+        newPosition,
+        reorderedBy: {
+          userId,
+          userName
+        },
+        timestamp: new Date()
+      });
+    });
+
+    // Column-related event handlers
     socket.on("columnUpdate", (data) => {
       const { boardId, columnId, updates } = data;
       socket.to(boardId).emit("columnUpdated", {
@@ -125,15 +188,25 @@ const initSocket = (server) => {
       });
     });
 
-    socket.on("taskMove", (data) => {
-      const { boardId, taskId, sourceColumnId, destinationColumnId, newIndex } = data;
-      socket.to(boardId).emit("taskMoved", {
+    socket.on("columnCreate", (data) => {
+      const { boardId, column } = data;
+      socket.to(boardId).emit("columnCreated", {
         boardId,
-        taskId,
-        sourceColumnId,
-        destinationColumnId,
-        newIndex,
-        movedBy: {
+        column,
+        createdBy: {
+          userId,
+          userName
+        },
+        timestamp: new Date()
+      });
+    });
+
+    socket.on("columnDelete", (data) => {
+      const { boardId, columnId } = data;
+      socket.to(boardId).emit("columnDeleted", {
+        boardId,
+        columnId,
+        deletedBy: {
           userId,
           userName
         },
@@ -154,6 +227,37 @@ const initSocket = (server) => {
       });
     });
 
+    socket.on("columnMove", (data) => {
+      const { boardId, columnId, oldPosition, newPosition } = data;
+      socket.to(boardId).emit("columnMoved", {
+        boardId,
+        columnId,
+        oldPosition,
+        newPosition,
+        movedBy: {
+          userId,
+          userName
+        },
+        timestamp: new Date()
+      });
+    });
+
+    // Comment-related event handlers
+    socket.on("addComment", (data) => {
+      const { boardId, taskId, comment } = data;
+      socket.to(boardId).emit("commentAdded", {
+        boardId,
+        taskId,
+        comment,
+        author: {
+          userId,
+          userName
+        },
+        timestamp: new Date()
+      });
+    });
+
+    // User activity events
     socket.on("userTyping", ({ boardId, taskId }) => {
       socket.to(boardId).emit("userIsTyping", {
         userId,
@@ -169,20 +273,6 @@ const initSocket = (server) => {
         userId,
         boardId,
         taskId
-      });
-    });
-
-    socket.on("addComment", (data) => {
-      const { boardId, taskId, comment } = data;
-      socket.to(boardId).emit("commentAdded", {
-        boardId,
-        taskId,
-        comment,
-        author: {
-          userId,
-          userName
-        },
-        timestamp: new Date()
       });
     });
 
