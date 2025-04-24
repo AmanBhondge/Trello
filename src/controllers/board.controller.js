@@ -15,12 +15,19 @@ export const getMyBoards = async (req, res) => {
 export const getAllBoards = async (req, res) => {
   try {
     const userId = req.user.userId;
+
     const boards = await Board.find({
       $or: [
         { createdBy: userId },
         { members: userId }
       ]
-    }).select('_id title visibility description');
+    })
+      .select('_id title visibility description createdBy') 
+      .populate({
+        path: 'createdBy',
+        select: 'userName email' 
+      });
+
     res.status(200).json(boards);
   } catch (err) {
     res.status(500).json({ error: err.message });
