@@ -104,6 +104,11 @@ export const getColumnsWithTasksAndComments = async (req, res) => {
   try {
     const { boardId } = req.params;
 
+    const board = await Board.findById(boardId).select('title');
+    if (!board) {
+      return res.status(404).json({ message: 'Board not found' });
+    }
+
     const columns = await Column.find({ boardId })
       .sort({ position: 1 })
       .populate({
