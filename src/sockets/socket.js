@@ -5,13 +5,13 @@ import User from "../models/user.model.js";
 import Board from "../models/board.model.js";
 
 const onlineUsers = new Map();
-let io; 
+let io;
 
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: "*",
-      methods: ["GET", "POST", "PUT"]
+      methods: ["GET", "POST", "PUT", "PATCH"]
     }
   });
 
