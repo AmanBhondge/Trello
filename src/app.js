@@ -16,7 +16,10 @@ import taskRouter from './routes/task.route.js';
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "https://trello-sigma-pearl.vercel.app",
+  credentials: true 
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
